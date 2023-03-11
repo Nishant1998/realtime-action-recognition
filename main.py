@@ -59,7 +59,7 @@ def main():
 
             if cv2.waitKey(25) & 0xFF == ord('q'):
                 break
-            elif frame_count.count > 256:
+            elif frame_count.count > 128:
                 break
         else:
             print(ret)

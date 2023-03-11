@@ -8,6 +8,9 @@ import numpy as np
 from utils.meter import AverageMeter, Counter, Timer
 from model.ObjectDetector.yolo import YoloV8Wrapper as YoloV8
 
+# YOLO :
+# 32: (5.89, 5.12);     16: (6.37, 5.65)(+10.35%);
+
 
 class PoseExtractor(nn.Module):
     def __init__(self, is_half):

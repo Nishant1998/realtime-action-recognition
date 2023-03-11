@@ -21,14 +21,26 @@ class YoloV8Wrapper(nn.Module):
         self.args = get_cfg(cfg, overrides)
         self.scale = None
 
-        if self.args.device == 'cuda' and self.args.half == True:
-            self.model = self.model.to(self.args.device).half()
-        elif self.args.device == 'cuda':
+        # if self.args.device == 'cuda' and self.args.half==True:
+        #     self.model = self.model.to(self.args.device).half()
+        # elif self.args.device == 'cuda':
+        #     self.model = self.model.to(self.args.device)
+        #
+        if self.args.device == 'cuda':
             self.model = self.model.to(self.args.device)
+            if self.args.half:
+                self.model = self.model.half()
 
     def forward(self, x):
         x, org_shape = self.image_preprocess(x)
-        x = self.model(x)
+        # x = self.model(x)
+
+        if self.args.half:
+            with torch.cuda.amp.autocast():
+                x = self.model(x)
+            x = (x[0].float(), [x[1][0].float(), x[1][1].float(), x[1][2].float()])
+        else:
+            x = self.model(x)
 
         x = ops.non_max_suppression(x,
                                     self.args.conf,
@@ -48,11 +60,17 @@ class YoloV8Wrapper(nn.Module):
 
         self.scale = (torch.tensor([[org_shape[1], org_shape[0], org_shape[1], org_shape[0]]]) / torch.tensor([[self.reshape_shape[1],self.reshape_shape[0],self.reshape_shape[1],self.reshape_shape[0]]]))
 
-        if self.args.device == 'cuda' and self.args.half == True:
-            img_tensor = img_tensor.to(self.args.device).half()
-            self.scale = self.scale.to(self.args.device)
-        elif self.args.device == 'cuda':
+        # if self.args.device == 'cuda' and self.args.half == True:
+        #     img_tensor = img_tensor.to(self.args.device).half()
+        #     self.scale = self.scale.to(self.args.device)
+        # elif self.args.device == 'cuda':
+        #     img_tensor = img_tensor.to(self.args.device)
+        #     self.scale = self.scale.to(self.args.device)
+
+        if self.args.device == 'cuda':
             img_tensor = img_tensor.to(self.args.device)
             self.scale = self.scale.to(self.args.device)
+            if self.args.half:
+                img_tensor = img_tensor.half()
 
         return img_tensor, org_shape
