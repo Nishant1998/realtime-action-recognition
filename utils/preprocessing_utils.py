@@ -5,9 +5,9 @@ import numpy as np
 import torch
 
 
-def yolo_postprocess(result, conf = 0.5):
-    boxes = result[0].boxes
-    boxes_xyxy = boxes.xyxy
+def yolo_postprocess(result, scale, conf=0.0):
+    boxes = result.boxes
+    boxes_xyxy = boxes.xyxy * scale
     boxes_conf = boxes.conf
     boxes_cls = boxes.cls
 
